@@ -2,6 +2,7 @@ import socket
 import tkinter as tk
 from tkinter import ttk
 from threading import Thread
+import math
 
 BUFFER_SIZE = 2048
 HOST = socket.gethostname()
@@ -124,13 +125,33 @@ class AppGUI:
 
     def update_canvas(self, data):
         self.canvas.delete("all")
+        parts = data.split(":")
+        operation = parts[0]
         print(data, type(data))
-        if data == "1":
-            self.canvas.create_oval(50, 50, 200, 200, fill="red")
-        elif data == "2":
+        if operation == "op_1":
+            amplitude = max(0,min(5,int(parts[1])))
+            frequency = max(0,min(10,int(parts[2])))
+
+            width = self.canvas.winfo_width()
+            height = self.canvas.winfo_height()
+
+            y_prev = None
+            for x in range(0, width):
+                y = (amplitude/10) * height * math.sin(2 * math.pi * frequency * (x / width))  # Calcula el valor de y
+                y = (height / 2) - y  # Ajusta y para que la onda esté centrada en el canvas
+                if y_prev is not None:
+                    # graficar el punto y unirlo con el anterior de forma que se forme la onda senoidal continua
+                    self.canvas.create_line(x-1, y_prev, x, y, fill="red")
+                y_prev = y            
+
+        elif operation == "op_2":
             self.canvas.create_rectangle(50, 50, 200, 200, fill="blue")
-        elif data == "3":
-            self.canvas.create_polygon(50, 50, 200, 200, 150, 150, fill="green")
+            #combinar matplotlib con tkinter?
+
+        elif operation == "op_3":
+            self.canvas.create_oval(50, 50, 200, 200, fill="green")
+        else:
+            self.canvas.create_text(100, 100, text=data, font=("Arial", 20))
 
 def main():
     root = tk.Tk()
