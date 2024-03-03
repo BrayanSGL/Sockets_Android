@@ -50,6 +50,8 @@ class Server:
                     if c != client:
                         c.send(data)
 
+                self.gui.update_canvas(data.decode("utf-8"))
+
                 if data.decode("utf-8") == "exit":
                     self.clients.remove(client)
                     client.close()
@@ -74,28 +76,38 @@ class AppGUI:
         self.root = root
         self.server = server
         self.root.title("Server")
-        self.root.geometry("300x300")
+        self.canvas = None
         self.root.resizable(False, False)
         self.create_widgets()
 
     def create_widgets(self):
-        self.lbl_ip = ttk.Label(self.root, text=f"IP: {self.server.get_server_ip()}")
+
+        info_frame = tk.Frame(self.root, width=300, height=100)
+        info_frame.pack(side=tk.LEFT, fill=tk.BOTH)
+
+        self.lbl_ip = ttk.Label(info_frame, text=f"IP: {self.server.get_server_ip()}")
         self.lbl_ip.pack()
 
-        self.lbl_port = ttk.Label(self.root, text=f"Puerto: {self.server.port}")
+        self.lbl_port = ttk.Label(info_frame, text=f"Puerto: {self.server.port}")
         self.lbl_port.pack()
 
-        self.lbl_clients = ttk.Label(self.root, text="Clientes conectados")
+        self.lbl_clients = ttk.Label(info_frame, text="Clientes conectados")
         self.lbl_clients.pack()
 
-        self.list_clients = tk.Listbox(self.root, width=30, height=10)
+        self.list_clients = tk.Listbox(info_frame, width=30, height=10)
         self.list_clients.pack()
 
-        self.btn_start = ttk.Button(self.root, text="Iniciar servidor", command=self.start_server)
+        self.btn_start = ttk.Button(info_frame, text="Iniciar servidor", command=self.start_server)
         self.btn_start.pack()
 
-        self.btn_close = ttk.Button(self.root, text="Cerrar servidor", command=self.close_server)
+        self.btn_close = ttk.Button(info_frame, text="Cerrar servidor", command=self.close_server)
         self.btn_close.pack()
+
+        canvas_frame = tk.Frame(self.root, width=300, height=200)
+        canvas_frame.pack(side=tk.LEFT, fill=tk.BOTH)
+
+        self.canvas = tk.Canvas(canvas_frame, bg="white")
+        self.canvas.pack(fill=tk.BOTH, expand=True)
 
     def start_server(self):
         print("Iniciando servidor")
@@ -111,6 +123,9 @@ class AppGUI:
         for client in clients:
             self.list_clients.insert(tk.END, client.getpeername()) # Inserta la dirección del cliente
 
+    def update_canvas(self, data):
+        self.canvas.delete("all")
+        self.canvas.create_text(150, 100, text=data)
 
 def main():
     root = tk.Tk()
