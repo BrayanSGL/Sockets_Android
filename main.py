@@ -81,7 +81,6 @@ class AppGUI:
         self.create_widgets()
 
     def create_widgets(self):
-
         info_frame = tk.Frame(self.root, width=300, height=100)
         info_frame.pack(side=tk.LEFT, fill=tk.BOTH)
 
@@ -125,7 +124,13 @@ class AppGUI:
 
     def update_canvas(self, data):
         self.canvas.delete("all")
-        self.canvas.create_text(150, 100, text=data)
+        print(data, type(data))
+        if data == "1":
+            self.canvas.create_oval(50, 50, 200, 200, fill="red")
+        elif data == "2":
+            self.canvas.create_rectangle(50, 50, 200, 200, fill="blue")
+        elif data == "3":
+            self.canvas.create_polygon(50, 50, 200, 200, 150, 150, fill="green")
 
 def main():
     root = tk.Tk()
