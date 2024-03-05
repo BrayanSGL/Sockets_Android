@@ -3,6 +3,12 @@ import tkinter as tk
 from tkinter import ttk
 from threading import Thread
 import math
+import matplotlib.pyplot as plt
+import numpy as np
+import matplotlib.animation as animation
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg #para combinar matplotlib con tkinter
+
+
 
 BUFFER_SIZE = 2048
 HOST = socket.gethostname()
@@ -79,6 +85,7 @@ class AppGUI:
         self.root.title("Server")
         self.canvas = None
         self.root.resizable(False, False)
+        self.math_frame = None
         self.create_widgets()
 
     def create_widgets(self):
@@ -103,11 +110,10 @@ class AppGUI:
         self.btn_close = ttk.Button(info_frame, text="Cerrar servidor", command=self.close_server)
         self.btn_close.pack()
 
-        canvas_frame = tk.Frame(self.root, width=300, height=200)
-        canvas_frame.pack(side=tk.LEFT, fill=tk.BOTH)
+        self.math_frame = tk.Frame(self.root, width=300, height=200)
+        self.math_frame.pack(side=tk.LEFT, fill=tk.BOTH)
 
-        self.canvas = tk.Canvas(canvas_frame, bg="white")
-        self.canvas.pack(fill=tk.BOTH, expand=True)
+        
 
     def start_server(self):
         print("Iniciando servidor")
@@ -123,36 +129,52 @@ class AppGUI:
         for client in clients:
             self.list_clients.insert(tk.END, client.getpeername()) # Inserta la dirección del cliente
 
+
+    #Pirmera opcion de graficar seno
+
     def update_canvas(self, data):
-        self.canvas.delete("all")
         parts = data.split(":")
         operation = parts[0]
         print(data, type(data))
         if operation == "op_1":
-            amplitude = max(0,min(5,int(parts[1])))
-            frequency = max(0,min(10,int(parts[2])))
-
-            width = self.canvas.winfo_width()
-            height = self.canvas.winfo_height()
-
-            y_prev = None
-            for x in range(0, width):
-                y = (amplitude/10) * height * math.sin(2 * math.pi * frequency * (x / width))  # Calcula el valor de y
-                y = (height / 2) - y  # Ajusta y para que la onda esté centrada en el canvas
-                if y_prev is not None:
-                    # graficar el punto y unirlo con el anterior de forma que se forme la onda senoidal continua
-                    self.canvas.create_line(x-1, y_prev, x, y, fill="red")
-                y_prev = y            
+            print("op_1")
+            x = np.linspace(0, 2 * np.pi, 200) 
+            y = float(parts[1]) * np.sin(float(parts[2]) * x)
+            if not hasattr(self, 'fig'):
+                self.fig, self.ax = plt.subplots()
+                self.canvas = FigureCanvasTkAgg(self.fig, master=self.math_frame)
+                self.canvas.get_tk_widget().pack()
+            else:
+                self.ax.clear()
+            self.ax.plot(x, y)
+            self.canvas.draw()
 
         elif operation == "op_2":
-            self.canvas.create_rectangle(50, 50, 200, 200, fill="blue")
-            #combinar matplotlib con tkinter?
+            x = np.linspace(-10, 10, 200) 
+            y = x
+            if not hasattr(self, 'fig'):
+                self.fig, self.ax = plt.subplots()
+                self.canvas = FigureCanvasTkAgg(self.fig, master=self.math_frame)
+                self.canvas.get_tk_widget().pack()
+            else:
+                self.ax.clear()
+            self.ax.plot(x, y)
+            self.canvas.draw()
 
         elif operation == "op_3":
-            self.canvas.create_oval(50, 50, 200, 200, fill="green")
+            x = np.linspace(-10, 10, 200)
+            y = -x**2
+            if not hasattr(self, 'fig'):
+                self.fig, self.ax = plt.subplots()
+                self.canvas = FigureCanvasTkAgg(self.fig, master=self.math_frame)
+                self.canvas.get_tk_widget().pack()
+            else:
+                self.ax.clear()
+            self.ax.plot(x, y)
+            self.canvas.draw()
         else:
-            self.canvas.create_text(100, 100, text=data, font=("Arial", 20))
-
+            pass
+        
 def main():
     root = tk.Tk()
     server = Server(HOST, PORT, None)
