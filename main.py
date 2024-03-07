@@ -57,7 +57,7 @@ class Server:
                     if c != client:
                         c.send(data)
 
-                self.gui.update_canvas(data.decode("utf-8"))
+                self.gui.root.after(0, self.gui.update_canvas(data.decode("utf-8"))) 
 
                 if data.decode("utf-8") == "exit":
                     self.clients.remove(client)
@@ -83,6 +83,7 @@ class AppGUI:
         self.root = root
         self.server = server
         self.root.title("Server")
+        self.fig, self.ax = plt.subplots()
         self.canvas = None
         self.root.resizable(False, False)
         self.math_frame = None
@@ -140,41 +141,30 @@ class AppGUI:
             print("op_1")
             x = np.linspace(0, 2 * np.pi, 200) 
             y = float(parts[1]) * np.sin(float(parts[2]) * x)
-            if not hasattr(self, 'fig'):
-                self.fig, self.ax = plt.subplots()
-                self.canvas = FigureCanvasTkAgg(self.fig, master=self.math_frame)
-                self.canvas.get_tk_widget().pack()
-            else:
-                self.ax.clear()
-            self.ax.plot(x, y)
-            self.canvas.draw()
+            self.root.after(0, self.draw_plot(x, y))
+            
 
         elif operation == "op_2":
             x = np.linspace(-10, 10, 200) 
             y = x
-            if not hasattr(self, 'fig'):
-                self.fig, self.ax = plt.subplots()
-                self.canvas = FigureCanvasTkAgg(self.fig, master=self.math_frame)
-                self.canvas.get_tk_widget().pack()
-            else:
-                self.ax.clear()
-            self.ax.plot(x, y)
-            self.canvas.draw()
+            self.root.after(0, self.draw_plot(x, y))
 
         elif operation == "op_3":
             x = np.linspace(-10, 10, 200)
             y = -x**2
-            if not hasattr(self, 'fig'):
-                self.fig, self.ax = plt.subplots()
-                self.canvas = FigureCanvasTkAgg(self.fig, master=self.math_frame)
-                self.canvas.get_tk_widget().pack()
-            else:
-                self.ax.clear()
-            self.ax.plot(x, y)
-            self.canvas.draw()
+            self.root.after(0, self.draw_plot(x, y))
         else:
             pass
         
+    def draw_plot(self, x, y):
+        if self.canvas is None:
+            self.canvas = FigureCanvasTkAgg(self.fig, master=self.math_frame)
+            self.canvas.get_tk_widget().pack()
+        else:
+            self.ax.clear()
+        self.ax.plot(x, y)
+        self.canvas.draw()
+    
 def main():
     root = tk.Tk()
     server = Server(HOST, PORT, None)
