@@ -2,10 +2,8 @@ import socket
 import tkinter as tk
 from tkinter import ttk
 from threading import Thread
-import math
 import matplotlib.pyplot as plt
 import numpy as np
-import matplotlib.animation as FuncAnimation
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg #para combinar matplotlib con tkinter
 
 
@@ -83,6 +81,7 @@ class AppGUI:
         self.root = root
         self.server = server
         self.root.title("Server")
+        self.root.geometry("600x400")
         self.fig, self.ax = plt.subplots()
         self.canvas = None
         self.root.resizable(False, False)
