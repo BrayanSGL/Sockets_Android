@@ -88,6 +88,7 @@ class AppGUI:
         self.root.resizable(False, False)
         self.math_frame = None
         self.create_widgets()
+        self.option = None
 
     def create_widgets(self):
         info_frame = tk.Frame(self.root, width=300, height=100)
@@ -131,12 +132,13 @@ class AppGUI:
             self.list_clients.insert(tk.END, client.getpeername()) # Inserta la dirección del cliente
 
 
-    #Pirmera opcion de graficar seno
 
     def update_canvas(self, data):
         parts = data.split(":")
         operation = parts[0]
         print(data, type(data))
+        self.option = operation
+
         if operation == "op_1":
             print("op_1")
             x = np.linspace(0, 2 * np.pi, 200) 
@@ -145,9 +147,20 @@ class AppGUI:
             
 
         elif operation == "op_2":
-            x = np.linspace(-10, 10, 200) 
-            y = x
-            self.root.after(0, self.draw_plot(x, y))
+            x = [1, 2]
+            y = [0, 100]
+            for i in range(101):
+                if self.option != "op_2":
+                    break
+                y[0] = i
+                y[1] = 100 - i
+                self.root.after(0, self.draw_bar(x, y))
+            for i in range(100, -1, -1):
+                if self.option != "op_2":
+                    break
+                y[0] = i
+                y[1] = 100 - i
+                self.root.after(0, self.draw_bar(x, y))
 
         elif operation == "op_3":
             x = np.linspace(-10, 10, 200)
@@ -163,6 +176,16 @@ class AppGUI:
         else:
             self.ax.clear()
         self.ax.plot(x, y)
+        self.canvas.draw()
+
+    def draw_bar(self, x, y):
+        if self.canvas is None:
+            self.canvas = FigureCanvasTkAgg(self.fig, master=self.math_frame)
+            self.canvas.get_tk_widget().pack()
+        else:
+            self.ax.clear()
+        self.ax.bar(x, y)
+        self.ax.set_ylim([0, 100])  # Establece los límites del eje y
         self.canvas.draw()
     
 def main():
