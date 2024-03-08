@@ -193,6 +193,12 @@ class AppGUI:
         else:
             self.ax.clear()
         self.ax.plot(x, y, "ro")
+        
+        #cañon
+        self.ax.plot(1, 1, "bo")
+        self.ax.plot([0, 7], [0, 7])
+
+
         self.ax.set_xlim((0, 200))
         self.ax.set_ylim((0, 200))
         self.canvas.draw()
