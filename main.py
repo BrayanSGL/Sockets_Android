@@ -5,7 +5,7 @@ from threading import Thread
 import math
 import matplotlib.pyplot as plt
 import numpy as np
-import matplotlib.animation as animation
+import matplotlib.animation as FuncAnimation
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg #para combinar matplotlib con tkinter
 
 
@@ -151,18 +151,18 @@ class AppGUI:
             animation_thread.start()
 
         elif operation == "op_3":
-            animation_thread = Thread(target=self.animate_parabola)
+            animation_thread = Thread(target=self.animate_lazamiento_parabolico)
             animation_thread.start()
         else:
             pass
         
-    def draw_plot(self, x, y):
+    def draw_plot(self, x, y, color='b'):
         if self.canvas is None:
             self.canvas = FigureCanvasTkAgg(self.fig, master=self.math_frame)
             self.canvas.get_tk_widget().pack()
         else:
             self.ax.clear()
-        self.ax.plot(x, y)
+        self.ax.plot(x, y, color)
         self.canvas.draw()
 
     def draw_bar(self, x, y):
@@ -185,21 +185,37 @@ class AppGUI:
             y[1] = 100 - i
             self.root.after(0, self.draw_bar(x, y))
 
-    def animate_parabola(self):
-        t = np.linspace(0, 10, num=500)  # tiempo
-        v0 = 20  # velocidad inicial
-        g = 9.81  # aceleración debido a la gravedad
+    def animate_lazamiento_parabolico(self):
+        
+        velocidad_inicial = 10  # m/s
+        angulo_disparo = 45  # grados
+        altura_inicial = 0  # m
 
-        # Posición en x y y en función del tiempo
-        x = v0 * t
-        y = v0 * t - 0.5 * g * t**2
+        # Convertir el ángulo a radianes
+        angulo_disparo = angulo_disparo * np.pi / 180
 
-        for xi, yi in zip(x, y):
+        # Calcular el tiempo de vuelo
+        tiempo_vuelo = 2 * velocidad_inicial * np.sin(angulo_disparo) / 9.81
+
+        # Definir los vectores de tiempo, posición y velocidad
+        t = np.linspace(0, tiempo_vuelo, 100)
+        x = velocidad_inicial * t * np.cos(angulo_disparo)
+        y = altura_inicial + velocidad_inicial * t * np.sin(angulo_disparo) - 0.5 * 9.81 * t**2
+
+        # Calcular el valor máximo de x
+        x_max = np.max(x)
+
+        self.ax.set_xlim((0, x_max))
+        self.ax.set_ylim((0, np.max(y)))
+
+        line, = self.ax.plot([], [], color="red", marker="o")
+
+        for i in range(len(t)):
             if self.option != "op_3":
                 break
-            self.root.after(0, self.draw_plot(np.array([xi]), np.array([yi])))
-
-    
+            line.set_data(x[:i+1], y[:i+1])
+            self.root.after(0, self.canvas.draw)
+               
     
 def main():
     root = tk.Tk()
