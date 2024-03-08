@@ -147,25 +147,12 @@ class AppGUI:
             
 
         elif operation == "op_2":
-            x = [1, 2]
-            y = [0, 100]
-            for i in range(101):
-                if self.option != "op_2":
-                    break
-                y[0] = i
-                y[1] = 100 - i
-                self.root.after(0, self.draw_bar(x, y))
-            for i in range(100, -1, -1):
-                if self.option != "op_2":
-                    break
-                y[0] = i
-                y[1] = 100 - i
-                self.root.after(0, self.draw_bar(x, y))
+            animation_thread = Thread(target=self.animate_bars)
+            animation_thread.start()
 
         elif operation == "op_3":
-            x = np.linspace(-10, 10, 200)
-            y = -x**2
-            self.root.after(0, self.draw_plot(x, y))
+            animation_thread = Thread(target=self.animate_parabola)
+            animation_thread.start()
         else:
             pass
         
@@ -187,6 +174,32 @@ class AppGUI:
         self.ax.bar(x, y)
         self.ax.set_ylim([0, 100])  # Establece los límites del eje y
         self.canvas.draw()
+
+    def animate_bars(self):
+        x = [1, 2]
+        y = [0, 100]
+        for i in list(range(101)) + list(range(100, -1, -1)):
+            if self.option != "op_2":
+                break
+            y[0] = i
+            y[1] = 100 - i
+            self.root.after(0, self.draw_bar(x, y))
+
+    def animate_parabola(self):
+        t = np.linspace(0, 10, num=500)  # tiempo
+        v0 = 20  # velocidad inicial
+        g = 9.81  # aceleración debido a la gravedad
+
+        # Posición en x y y en función del tiempo
+        x = v0 * t
+        y = v0 * t - 0.5 * g * t**2
+
+        for xi, yi in zip(x, y):
+            if self.option != "op_3":
+                break
+            self.root.after(0, self.draw_plot(np.array([xi]), np.array([yi])))
+
+    
     
 def main():
     root = tk.Tk()
