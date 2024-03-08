@@ -151,7 +151,7 @@ class AppGUI:
             animation_thread.start()
 
         elif operation == "op_3":
-            animation_thread = Thread(target=self.animate_lazamiento_parabolico)
+            animation_thread = Thread(target=self.animate_dot_parabolic)
             animation_thread.start()
         else:
             pass
@@ -178,43 +178,50 @@ class AppGUI:
     def animate_bars(self):
         x = [1, 2]
         y = [0, 100]
-        for i in list(range(101)) + list(range(100, -1, -1)):
-            if self.option != "op_2":
-                break
-            y[0] = i
-            y[1] = 100 - i
-            self.root.after(0, self.draw_bar(x, y))
+        while self.option == "op_2":
+            for i in list(range(101)) + list(range(100, -1, -1)):
+                if self.option != "op_2":
+                    break
+                y[0] = i
+                y[1] = 100 - i
+                self.root.after(0, self.draw_bar(x, y))
 
-    def animate_lazamiento_parabolico(self):
-        
-        velocidad_inicial = 10  # m/s
-        angulo_disparo = 45  # grados
-        altura_inicial = 0  # m
+    def draw_dot(self, x, y):
+        if self.canvas is None:
+            self.canvas = FigureCanvasTkAgg(self.fig, master=self.math_frame)
+            self.canvas.get_tk_widget().pack()
+        else:
+            self.ax.clear()
+        self.ax.plot(x, y, "ro")
+        self.ax.set_xlim((0, 200))
+        self.ax.set_ylim((0, 200))
+        self.canvas.draw()
 
-        # Convertir el ángulo a radianes
-        angulo_disparo = angulo_disparo * np.pi / 180
+    def animate_dot_parabolic(self):
+        while self.option == "op_3":
+            velocidad_inicial = 10 # m/s
+            angulo_disparo = 45 # grados
+            altura_inicial = 0 # m
 
-        # Calcular el tiempo de vuelo
-        tiempo_vuelo = 2 * velocidad_inicial * np.sin(angulo_disparo) / 9.81
+            # Convertir el ángulo a radianes
+            angulo_disparo = angulo_disparo * np.pi / 180
 
-        # Definir los vectores de tiempo, posición y velocidad
-        t = np.linspace(0, tiempo_vuelo, 100)
-        x = velocidad_inicial * t * np.cos(angulo_disparo)
-        y = altura_inicial + velocidad_inicial * t * np.sin(angulo_disparo) - 0.5 * 9.81 * t**2
+            # Calcular el tiempo de vuelo
+            tiempo_vuelo = 2 * velocidad_inicial * np.sin(angulo_disparo) / 9.81
 
-        # Calcular el valor máximo de x
-        x_max = np.max(x)
+            # Definir los vectores de tiempo, posición y velocidad
+            t = np.linspace(0, tiempo_vuelo, 100)
+            x = velocidad_inicial * t * np.cos(angulo_disparo)
+            y = altura_inicial + velocidad_inicial * t * np.sin(angulo_disparo) - 0.5 * 9.81 * t**2
 
-        self.ax.set_xlim((0, x_max))
-        self.ax.set_ylim((0, np.max(y)))
+            # Normalizing x and y for the plot
+            x = x * 150 / max(x)
+            y = y * 100 / max(y)
 
-        line, = self.ax.plot([], [], color="red", marker="o")
-
-        for i in range(len(t)):
-            if self.option != "op_3":
-                break
-            line.set_data(x[:i+1], y[:i+1])
-            self.root.after(0, self.canvas.draw)
+            for i in range(len(t)):
+                if self.option != "op_3":
+                    break
+                self.root.after(0, self.draw_dot(x[i], y[i]))
                
     
 def main():
